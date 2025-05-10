@@ -31,22 +31,22 @@ export default function CosmicBackground({ forceRender = Date.now() }) {
 
     // Renderer setup
     const renderer = new THREE.WebGLRenderer({
-      antialias: true,
+      antialias: window.innerWidth >= 768, // Disable antialiasing on mobile
       alpha: true,
       powerPreference: "high-performance",
     })
     renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2)) // Lower pixel ratio for mobile
     containerRef.current.appendChild(renderer.domElement)
     rendererRef.current = renderer
 
     // Particles
     const particlesGeometry = new THREE.BufferGeometry()
-    const particlesCount = 500 // Fewer particles for cards
+    const particlesCount = window.innerWidth < 768 ? 200 : 500 // Reduce particles for mobile
 
     const posArray = new Float32Array(particlesCount * 3)
     for (let i = 0; i < particlesCount * 3; i++) {
-      posArray[i] = (Math.random() - 0.5) * 10
+      posArray[i] = (Math.random() - 0.5) * (window.innerWidth < 768 ? 5 : 10) // Smaller area for mobile
     }
 
     particlesGeometry.setAttribute("position", new THREE.BufferAttribute(posArray, 3))
@@ -75,7 +75,7 @@ export default function CosmicBackground({ forceRender = Date.now() }) {
     // Create shining stars
     const starColors = [0xffffff, 0xffffcc, 0xccffff, 0xffccff, 0xccccff]
     const starsGeometry = new THREE.BufferGeometry()
-    const starsCount = 50 // Fewer stars for cards
+    const starsCount = window.innerWidth < 768 ? 20 : 50 // Fewer stars for mobile
 
     const starsPositions = new Float32Array(starsCount * 3)
     const starsSizes = new Float32Array(starsCount)
@@ -174,16 +174,16 @@ export default function CosmicBackground({ forceRender = Date.now() }) {
     // Animation
     let time = 0
     const animate = () => {
-      time += 0.01
-
+      time += window.innerWidth < 768 ? 0.005 : 0.01 // Slower animation on mobile
+    
       // Update star twinkling
       if (starsShaderMaterial.uniforms) {
         starsShaderMaterial.uniforms.time.value = time
       }
-
-      particlesMesh.rotation.x += 0.0005
-      particlesMesh.rotation.y += 0.0005
-
+    
+      particlesMesh.rotation.x += window.innerWidth < 768 ? 0.0002 : 0.0005 // Slower rotation on mobile
+      particlesMesh.rotation.y += window.innerWidth < 768 ? 0.0002 : 0.0005
+    
       renderer.render(scene, camera)
       animationFrameRef.current = requestAnimationFrame(animate)
     }
